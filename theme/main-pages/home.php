@@ -15,11 +15,11 @@ get_header();
         <?php
         while (have_posts()) :
             the_post();
-            get_template_part('theme/template-parts/content/content', 'home');
+            get_template_part('template-parts/content/content', 'home');
         endwhile;
         ?>
     </main>
 </section>
 
 <?php
-get_footer(); 
+get_footer();

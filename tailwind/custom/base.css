@@ -20,3 +20,142 @@ body {
 		--color-black: #141414;
 	}
 }
+
+/* Binary Background Animation */
+.binary-background {
+    position: relative;
+    background: white;
+}
+
+.binary-background::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.binary-digit {
+    position: fixed;
+    color: rgba(89, 14, 183, 0.2);
+    font-family: monospace;
+    font-size: 20px;
+    font-weight: bold;
+    user-select: none;
+    pointer-events: none;
+    z-index: -1;
+    will-change: transform;
+}
+
+/* Ensure content stays above binary digits */
+#page {
+    position: relative;
+    z-index: 1;
+}
+
+/* Marquee Animations */
+@keyframes marquee-top {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes marquee-bottom {
+    0% {
+        transform: translateX(-50%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% - 1rem));
+  }
+}
+
+.animate-marquee-top {
+    animation: marquee-top 30s linear infinite;
+}
+
+.animate-marquee-bottom {
+    animation: marquee-bottom 30s linear infinite;
+}
+
+.animate-marquee-horizontally {
+  animation: marquee 25s linear infinite;
+  will-change: transform;
+}
+
+.sticky-scroll-container {
+  --scroll-offset: 0;
+  --total-sections: 3;
+}
+
+.sticky-scroll-section {
+  transition: transform 0.3s ease-out;
+}
+
+.sticky-scroll-section[data-visible="true"] {
+  transform: scale(1);
+}
+
+.sticky-scroll-section[data-visible="false"] {
+  transform: scale(0.8);
+}
+
+@media (max-width: 767px) {
+  .sticky-scroll-section {
+    transform: none !important;
+  }
+}
+
+/* Menu Item Spacing */
+.primary-menu .menu-item-has-children > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.primary-menu .menu-item-has-children > a i {
+    margin-left: 0;
+}
+
+/* Tabs Styling */
+.tab-content {
+    display: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.tab-content.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tab-trigger.active {
+    border-color: #590EB7;
+    color: #590EB7;
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}

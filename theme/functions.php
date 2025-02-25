@@ -80,8 +80,9 @@ if ( ! function_exists( '_cg_setup' ) ) :
 		// This theme uses wp_nav_menu() in two locations.
 		register_nav_menus(
 			array(
-				'menu-1' => __( 'Primary', '_cg' ),
-				'menu-2' => __( 'Footer Menu', '_cg' ),
+				'menu-1' => esc_html__( 'Primary', '_cg' ),
+				'footer-1' => esc_html__( 'Footer Quick Links', '_cg' ),
+				'footer-2' => esc_html__( 'Footer Resources', '_cg' ),
 			)
 		);
 
@@ -145,14 +146,75 @@ add_action( 'widgets_init', '_cg_widgets_init' );
  * Enqueue scripts and styles.
  */
 function _cg_scripts() {
-	wp_enqueue_style( '_cg-style', get_stylesheet_uri(), array(), _CG_VERSION );
-	wp_enqueue_script( '_cg-script', get_template_directory_uri() . '/js/script.min.js', array(), _CG_VERSION, true );
+    // Enqueue styles
+    wp_enqueue_style('_cg-style', get_stylesheet_uri(), array(), _CG_VERSION);
+    wp_enqueue_style('_cg-page-transition', get_template_directory_uri() . '/js/page-transition.css', array(), _CG_VERSION);
+    wp_enqueue_style('_cg-navigation', get_template_directory_uri() . '/js/navigation.css', array(), _CG_VERSION);
 
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-		wp_enqueue_script( 'comment-reply' );
-	}
+    // Make sure jQuery is loaded in the header
+    wp_enqueue_script('jquery');
+
+    // Enqueue our scripts in footer with jQuery dependency
+    wp_register_script('_cg-page-transition', get_template_directory_uri() . '/js/page-transition.js', array('jquery'), _CG_VERSION, true);
+    wp_register_script('_cg-navigation', get_template_directory_uri() . '/js/navigation.js', array('jquery'), _CG_VERSION, true);
+    wp_register_script('_cg-script', get_template_directory_uri() . '/js/script.min.js', array('jquery'), _CG_VERSION, true);
+
+    // Add AOS library
+    if (is_front_page()) {
+        wp_enqueue_style('aos-css', 'https://unpkg.com/aos@2.3.1/dist/aos.css', array(), null);
+        wp_enqueue_script('aos-js', 'https://unpkg.com/aos@2.3.1/dist/aos.js', array(), null, true);
+        
+        // Add hero animations script
+        wp_enqueue_script(
+            '_cg-hero-animations',
+            get_template_directory_uri() . '/js/hero-animations.js',
+            array('aos-js'),
+            _CG_VERSION,
+            true
+        );
+    }
+
+    // Add binary background script
+    wp_enqueue_script(
+        '_cg-binary-background',
+        get_template_directory_uri() . '/js/binary-background.js',
+        array(),
+        _CG_VERSION,
+        true
+    );
+
+    // Localize the script with site data
+    wp_localize_script('_cg-page-transition', '_cgData', array(
+        'ajaxurl' => admin_url('admin-ajax.php'),
+        'homeUrl' => home_url()
+    ));
+
+    // Enqueue the scripts
+    wp_enqueue_script('_cg-page-transition');
+    wp_enqueue_script('_cg-navigation');
+    wp_enqueue_script('_cg-script');
+
+    if (is_singular() && comments_open() && get_option('thread_comments')) {
+        wp_enqueue_script('comment-reply');
+    }
 }
 add_action( 'wp_enqueue_scripts', '_cg_scripts' );
+
+/**
+ * Enqueue layout-specific scripts
+ */
+function cg_enqueue_layout_scripts() {
+    if (is_page_template('page-about.php')) {
+        wp_enqueue_script(
+            'layout-423-animations',
+            get_template_directory_uri() . '/theme/js/layout-423-animations.js',
+            array('jquery'),
+            '1.0.0',
+            true
+        );
+    }
+}
+add_action('wp_enqueue_scripts', 'cg_enqueue_layout_scripts');
 
 /**
  * Enqueue the block editor script.
@@ -195,3 +257,17 @@ require get_template_directory() . '/inc/template-tags.php';
  * Functions which enhance the theme by hooking into WordPress.
  */
 require get_template_directory() . '/inc/template-functions.php';
+
+// Include custom nav walker
+require get_template_directory() . '/inc/class-custom-walker-nav-menu.php';
+
+// Add ACF Options Page
+if (function_exists('acf_add_options_page')) {
+    acf_add_options_page(array(
+        'page_title'    => 'Theme Settings',
+        'menu_title'    => 'Theme Settings',
+        'menu_slug'     => 'theme-settings',
+        'capability'    => 'edit_posts',
+        'redirect'      => false
+    ));
+}
